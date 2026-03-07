@@ -203,7 +203,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div className="flex items-center justify-center p-8 col-span-5">
-            
+            <Image className="border-none" src="/images/clients/about.svg" alt="About Us" width="1000" height="1000"/>
           </div>
 
         </div>
@@ -481,7 +481,7 @@ export default async function HomePage() {
                     {new Date(n.publishedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.')}
                   </span>&emsp;|&emsp;
                   <span className="font-sans font-bold text-[14px] leading-[100%] tracking-[0.08em] py-0.5 rounded shrink-0 h-fit">{n.category || 'お知らせ'}</span>&emsp;|&emsp;
-                  <button className='border border-[#2D2A24] px-2 py-1 rounded font-["FOT-Cezanne_ProN"] font-semibold text-[12px] leading-[100%] tracking-[0.08em]'>AND STORY</button>
+                  <button className='border border-[#2D2A24] px-2 py-1 rounded font-["FOT-Cezanne_ProN"] font-semibold text-[12px] leading-[100%] tracking-[0.08em] hover:bg-[#2D2A24] hover:text-[#F5F0E8] transition-colors'>AND STORY</button>
                 </div>
                 <div className='col-span-6 py-10 px-4'>
                   <h3 className='font-sans font-bold text-[24px] leading-[200%] tracking-[0.04em]'>{n.title}</h3>

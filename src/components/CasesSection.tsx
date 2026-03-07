@@ -61,7 +61,7 @@ export default function CasesSection({ cases }: CasesSectionProps) {
                   <p className="text-xs font-medium mb-2 font-bold text-[14px]">{c.category || 'コミュニティ開発'}</p>
                   <h3 className="mt-5 font-sans font-bold text-[24px] leading-[150%] tracking-[0.04em] line-clamp-2">{c.title}</h3>
                   <p className="mt-5 font-sans font-medium text-[16px] leading-[200%] tracking-[0.08em] text-[#2D2A24] line-clamp-3">{c.summary}</p>
-                  <button className='mt-5 py-1 px-3 border border-[#2D2A24] rounded-lg font-["FOT-Cezanne_ProN"] font-semibold text-[12px] leading-[100%] tracking-[0.08em]'>AND STORY</button>
+                  <button className='mt-5 py-1 px-3 border border-[#2D2A24] rounded-lg font-["FOT-Cezanne_ProN"] font-semibold text-[12px] leading-[100%] tracking-[0.08em] hover:bg-[#2D2A24] hover:text-[#F5F0E8] transition-colors'>AND STORY</button>
                 </div>
                 {c.thumbnail && (
                   <div className="col-span-1 overflow-hidden py-10 pl-4 pr-10">
