@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const clientLogos = [
   { name: 'adidas', file: 'adidas.svg' },
@@ -31,76 +31,156 @@ const clientLogos = [
   { name: 'YKK', file: 'ykk.svg' },
 ]
 
-const ITEMS_PER_PAGE = 15
+const ROWS = 3
+const COLUMNS_VISIBLE = 5
+const AUTO_SLIDE_INTERVAL = 3000 // 3 seconds
 
 export default function ClientsSection() {
-  const allLogos = [...clientLogos, ...clientLogos]
-  const totalPages = Math.ceil(allLogos.length / ITEMS_PER_PAGE)
-  const [currentPage, setCurrentPage] = useState(0)
-
-  const startIndex = currentPage * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const displayedLogos = allLogos.slice(startIndex, endIndex)
+  // Organize original logos into columns first
+  const originalColumns: (typeof clientLogos[number])[][] = []
+  for (let i = 0; i < clientLogos.length; i += ROWS) {
+    originalColumns.push(clientLogos.slice(i, i + ROWS))
+  }
+  const originalColumnCount = originalColumns.length
+  
+  // Duplicate columns for seamless infinite loop (need at least 2 sets)
+  const columns = [...originalColumns, ...originalColumns, ...originalColumns]
+  const totalColumns = columns.length
+  
+  const [currentColumn, setCurrentColumn] = useState(originalColumnCount)
+  const [isTransitioning, setIsTransitioning] = useState(true)
+  const [isPrevHovered, setIsPrevHovered] = useState(false)
+  const [isNextHovered, setIsNextHovered] = useState(false)
+  const autoSlideRef = useRef<NodeJS.Timeout | null>(null)
 
   const handlePrev = () => {
-    setCurrentPage((prev) => Math.max(0, prev - 1))
+    setCurrentColumn((prev) => {
+      if (prev <= originalColumnCount) {
+        // Jump to the end of the duplicate set (same content as start)
+        return originalColumnCount * 2 - 1
+      }
+      return prev - 1
+    })
   }
 
   const handleNext = () => {
-    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
+    setCurrentColumn((prev) => {
+      return prev + 1
+    })
   }
 
-  const canGoPrev = currentPage > 0
-  const canGoNext = currentPage < totalPages - 1
+  // Handle seamless reset when reaching the boundary
+  useEffect(() => {
+    if (currentColumn >= originalColumnCount * 2) {
+      // We've scrolled past the second duplicate, reset to the first duplicate (same content)
+      setIsTransitioning(false)
+      const resetTimeout = setTimeout(() => {
+        setCurrentColumn(originalColumnCount)
+        setTimeout(() => {
+          setIsTransitioning(true)
+        }, 50)
+      }, 50)
+      return () => clearTimeout(resetTimeout)
+    }
+  }, [currentColumn, originalColumnCount])
+
+  // Auto-slide functionality - move one column at a time with seamless loop
+  useEffect(() => {
+    autoSlideRef.current = setInterval(() => {
+      setCurrentColumn((prev) => {
+        return prev + 1
+      })
+    }, AUTO_SLIDE_INTERVAL)
+
+    return () => {
+      if (autoSlideRef.current) {
+        clearInterval(autoSlideRef.current)
+      }
+    }
+  }, [])
+
+  const canGoPrev = true // Always allow prev for infinite loop
+  const canGoNext = true // Always allow next for infinite loop
 
   return (
-    <section className="max-w-[1600px] mx-auto border-b border-[#2D2A24]">
-      <div className="px-4 border-b border-[#2D2A24] grid grid-cols-12 items-center">
-        <div className='col-span-2 py-4'>
-          <p className="text-[40px] font-medium text-[#2D2A24]">Our clients</p>
+    <section className="border-b border-[#2D2A24]">
+      <div className="px-[40px] border-b border-[#2D2A24] flex items-center justify-between h-[96px]">
+        <div className='flex items-center pr-[40px] border-r border-[#2D2A24] h-full'>
+          <p className="text-[40px] text-[#333] font-semibold font-poppins tracking-[-0.04em] leading-[1]">Our clients</p>
         </div>
-        <div className='col-span-9 border-l border-r border-[#2D2A24] h-full flex items-center justify-end pr-4 py-4'>
-          <span className='flex'>
+        <div className='flex items-center justify-end h-full'>
+          <span className='flex mr-[40px] border border-[#2D2A24] rounded-lg'>
             <button
               name='prev'
               onClick={handlePrev}
               disabled={!canGoPrev}
-              className={`border-l border-t border-b border-[#2D2A24] rounded-lg px-4 py-1 hover:bg-[#2D2A24] hover:text-[#F5F0E8] rounded-tr-none rounded-br-none transition-all ${
+              onMouseEnter={() => setIsPrevHovered(true)}
+              onMouseLeave={() => setIsPrevHovered(false)}
+              className={`rounded-lg pl-[16px] pr-[20px] py-[16px] hover:bg-[#18bed7] hover:text-[#FFF] transition-all ${
                 !canGoPrev ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              &lt;
+              <img
+                src={isPrevHovered ? "/images/clients/arrow-left-white.svg" : "/images/clients/arrow-right.svg"}
+                className={!isPrevHovered ? 'translate-x-[1px] rotate-180' : ''}
+              />
             </button>
             <button
               name='next'
               onClick={handleNext}
               disabled={!canGoNext}
-              className={`border-r border-t border-b border-[#2D2A24] rounded-lg px-4 py-1 hover:bg-[#2D2A24] hover:text-[#F5F0E8] rounded-tl-none rounded-bl-none transition-all ${
+              onMouseEnter={() => setIsNextHovered(true)}
+              onMouseLeave={() => setIsNextHovered(false)}
+              className={`rounded-lg hover:bg-[#18bed7] hover:text-[#FFFDF7] pl-[20px] pr-[16px] py-[16px]   transition-all ${
                 !canGoNext ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              &gt;
+              <img
+                src={isNextHovered ? "/images/clients/arrow-left-white.svg" : "/images/clients/arrow-right.svg"}
+                className={isNextHovered ? 'translate-x-[1px] rotate-180' : ''}
+              />
             </button>
           </span>
-        </div>
-        <div className='col-span-1 items-center justify-center pl-4 py-4'>
-          <p>お取引企業</p>
+          <div className='w-[1px] h-full bg-[#2D2A24]'></div>
+          <p className='text-[16px] font-medium text-[#333] tracking-[0.04em] leading-[2] font-sans pl-[40px]'>お取引企業</p>
         </div>
       </div>
       <div className="overflow-hidden">
-        <div className="grid grid-cols-5 items-center justify-center">
-          {displayedLogos.map((logo, i) => (
-            <div
-              key={`${logo.name}-${startIndex + i}`}
-              className="shrink-0 flex items-center justify-center col-span-1 h-[200px]"
-            >
-              <img
-                src={`/images/clients/${logo.file}`}
-                alt={logo.name}
-                className="max-h-65 max-w-[120px] object-contain grayscale hover:grayscale-0 transition-all"
-              />
-            </div>
-          ))}
+        <div 
+          className={`flex ${isTransitioning ? 'transition-transform duration-1000 ease-in-out' : ''}`}
+          style={{ transform: `translateX(-${currentColumn * (100 / COLUMNS_VISIBLE)}%)` }}
+        >
+          {columns.map((columnLogos, columnIndex) => {
+            return (
+              <div 
+                key={columnIndex}
+                className="flex flex-col shrink-0"
+                style={{ width: `${100 / COLUMNS_VISIBLE}%` }}
+              >
+                {Array.from({ length: ROWS }).map((_, rowIndex) => {
+                  const logo = columnLogos[rowIndex]
+                  const isFinalRow = rowIndex === ROWS - 1
+                  const isFinalColumn = columnIndex % COLUMNS_VISIBLE === COLUMNS_VISIBLE - 1
+                  const shouldRemoveClass = isFinalRow
+                  
+                  return (
+                    <div
+                      key={`${columnIndex}-${rowIndex}`}
+                      className={`shrink-0 flex items-center justify-center h-[200px] relative ${shouldRemoveClass ? '' : 'client-logo-item'}`}
+                    >
+                      {logo && (
+                        <img
+                          src={`/images/clients/${logo.file}`}
+                          alt={logo.name}
+                          className="max-h-65 max-w-[120px] object-contain grayscale hover:grayscale-0 transition-all"
+                        />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
