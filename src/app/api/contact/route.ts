@@ -1,0 +1,42 @@
+import { NextResponse } from 'next/server'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+export async function POST(req: Request) {
+  const body = await req.json()
+  const { name, kana, email, tel, company, category, message } = body
+
+  try {
+    await resend.emails.send({
+      from: 'STORY&Co. <onboarding@resend.dev>',
+      to: 'takuhosokawa@gmail.com',
+      subject: `【STORY&Co.】新しいお問い合わせが届きました`,
+       html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:40px 20px;color:#333;">
+          <h2 style="font-size:18px;font-weight:bold;margin-bottom:32px;">新しいお問い合わせが届きました</h2>
+          ${[
+            ['Name', name],
+            ['KanaName', kana],
+            ['Email', email],
+            ['tel', tel || 'なし'],
+            ['companyName', company || 'なし'],
+            ['Options 1', category],
+          ].map(([label, value]) => `
+            <div style="border-bottom:1px solid #eee;padding:16px 0;">
+              <p style="font-size:12px;color:#999;margin:0 0 8px;">${label}</p>
+              <p style="font-size:16px;margin:0;">${value}</p>
+            </div>
+          `).join('')}
+          <div style="border-bottom:1px solid #eee;padding:16px 0;">
+            <p style="font-size:12px;color:#999;margin:0 0 8px;">Message</p>
+            <p style="font-size:16px;margin:0;white-space:pre-wrap;">${message}</p>
+          </div>
+        </div>
+      `,
+    })
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ success: false }, { status: 500 })
+  }
+}

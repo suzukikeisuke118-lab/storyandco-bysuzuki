@@ -4,19 +4,16 @@ import Link from 'next/link'
 import { useState, useMemo } from 'react'
 import CommonLink from '@/components/CommonLink'
 import type { NewsItem } from './NewsSection'
-
-type TabId = 'all' | 'informations' | 'reports' | 'medias' | 'events'
-
-const tabs: { id: TabId; label: string; category: string | null }[] = [
-  { id: 'all', label: 'すべて', category: null },
-  { id: 'informations', label: 'お知らせ', category: 'お知らせ' },
-  { id: 'reports', label: 'プレス', category: 'プレスリリース' },
-  { id: 'medias', label: 'メディア', category: 'メディア掲載' },
-  { id: 'events', label: 'イベント', category: 'イベント' },
+const tabs = [
+  { id: 'all', label: 'すべて', category: null, minWidth: '86.6px' },
+  { id: 'informations', label: 'お知らせ', category: 'お知らせ', minWidth: '120px' },
+  { id: 'reports', label: 'プレス', category: 'プレスリリース', minWidth: '100px' },
+  { id: 'medias', label: 'メディア', category: 'メディア掲載', minWidth: '120px' },
+  { id: 'events', label: 'イベント', category: 'イベント', minWidth: '100px' },
 ]
 
 export default function NewsSectionClient({ news }: { news: NewsItem[] }) {
-  const [activeTab, setActiveTab] = useState<TabId>('all')
+  const [activeTab, setActiveTab] = useState('all')
 
   // Filter news based on active tab
   const filteredNews = useMemo(() => {
@@ -83,7 +80,7 @@ export default function NewsSectionClient({ news }: { news: NewsItem[] }) {
               <div className='col-span-1 md:col-span-1 lg:col-span-3 border-r-0 md:border-r lg:border-r md:border-b md:border-b-0 lg:border-b-0 border-[#2d2a24] items-start justify-start flex flex-col md:flex-row gap-2 md:gap-0 md:px-6 lg:px-[40px] md:pt-10 lg:pt-[78px] md:pb-10 lg:pb-[82px]'>
                 <div className='flex flex-row items-center gap-2 md:gap-0'>
                   <span className="font-poppins font-medium text-xs md:text-sm lg:text-[14px] text-[#2d2a24] shrink-0">
-                    {new Date(n.publishedAt).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.')}
+                    {new Date(n.publishDate).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '.')}
                   </span>
                   <span className='block md:hidden'>&nbsp;|&nbsp;</span>
                   <span className="hidden md:inline">&emsp;|&emsp;</span>
